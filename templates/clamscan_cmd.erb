@@ -1,5 +1,9 @@
 <%
-  t_clamscan_cmd = ["/bin/nice -n #{@nice_level} /usr/bin/clamscan -l #{@logfile}"]
+  if @operatingsystem == 'RedHat' or @operatingsystem == 'CentOS'
+    t_clamscan_cmd = ["/bin/nice -n #{@nice_level} /usr/bin/clamscan -l #{@logfile}"]
+  elsif @operatingsystem == 'Debian' or @operatingsystem == 'Ubuntu'
+    t_clamscan_cmd = ["/usr/bin/nice -n #{@nice_level} /usr/bin/clamscan -l #{@logfile}"]
+  end
 
   if @official_db_only then
     t_clamscan_cmd << '--official-db-only=yes'

@@ -52,6 +52,16 @@ class clamav (
     }
 
     if $manage_group_and_user {
+      if $facts['os']['name'] in ['RedHat','CentOS'] {
+        $_nologin = '/sbin/nologin'
+      }
+      elsif $facts['os']['name'] in ['Debian','Ubuntu'] {
+        $_nologin = '/usr/sbin/nologin'
+      }
+      else {
+        fail("OS '${facts['os']['name']}' not supported by '${module_name}'")
+      }
+
       group { $clamav_group:
         ensure    =>  'present',
         allowdupe => false,
@@ -62,7 +72,7 @@ class clamav (
         allowdupe  => false,
         comment    => 'Clam Anti Virus Checker',
         uid        => '409',
-        shell      => '/sbin/nologin',
+        shell      => $_nologin,
         gid        => $clamav_group,
         home       => '/var/lib/clamav',
         membership => 'inclusive',
@@ -87,6 +97,13 @@ class clamav (
       package { 'clamav-lib.i386':
         ensure => 'absent',
         notify => Package[$package_name]
+      }
+    }
+
+    if $facts['os']['name'] in ['Debian','Ubuntu'] {
+      service { 'clamav-freshclam':
+        ensure => 'stopped',
+        enable => false
       }
     }
 
